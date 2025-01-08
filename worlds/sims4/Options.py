@@ -60,6 +60,7 @@ class StuffPacks(OptionSet):
                   StuffNames.laundry_day, StuffNames.my_first_pet, StuffNames.moshino,
                   StuffNames.tiny_living, StuffNames.nifty_knitting, StuffNames.paranormal,
                   StuffNames.home_chef_hustle, StuffNames.crystal_creations}
+
 class CASKits(OptionSet):
     """List of CAS (Create a Sim) Kits that will be included in the shuffling."""
     display_name = "cas_kits"
