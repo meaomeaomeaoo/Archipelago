@@ -177,3 +177,6 @@ minecraft_versions.json
 .LSOverride
 Thumbs.db
 [Dd]esktop.ini
+
+# sims 4 specific syncing script
+/sims4-switch-upstream.sh
