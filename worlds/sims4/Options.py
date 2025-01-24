@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from Options import Choice, PerGameCommonOptions, OptionSet
-from .Names.DLC import ExpansionNames, GamePackNames, StuffNames, CASKitNames, BuildKitNames
+from .Names.DLC import ExpansionNames, GamePackNames, StuffNames, CASKitNames, BuildKitNames, BuildCASKitNames
 
 class AspirationGoal(Choice):
     """The Aspiration Needed to win the game and the only one that will be included in the locations"""
@@ -92,6 +92,11 @@ class BuildKits(OptionSet):
                   BuildKitNames.artist_studio, BuildKitNames.storybook_nursery, BuildKitNames.cozy_kitsch,
                   BuildKitNames.comfy_gamer}
 
+class BuildCASKits(OptionSet):
+    """List of Build + CAS Kits that will be included in the shuffling. (Not Yet Implemented)"""
+    display_name = "build_cas_kits"
+    valid_keys = {BuildCASKitNames.secret_sanctuary, BuildCASKitNames.cassanova_cave}
+
 @dataclass
 class Sims4Options(PerGameCommonOptions):
     goal: AspirationGoal
@@ -101,3 +106,4 @@ class Sims4Options(PerGameCommonOptions):
     stuff_packs: StuffPacks
     cas_kits: CASKits
     build_kits: BuildKits
+    build_cas_kits: BuildCASKits
