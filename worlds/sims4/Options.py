@@ -89,7 +89,8 @@ class BuildKits(OptionSet):
                   BuildKitNames.bathroom_clutter, BuildKitNames.basement_treasures, BuildKitNames.greenhouse_haven,
                   BuildKitNames.book_nook, BuildKitNames.modern_luxe, BuildKitNames.castle_estate,
                   BuildKitNames.party_essentials, BuildKitNames.cozy_bistro, BuildKitNames.riviera_retreat,
-                  BuildKitNames.artist_studio, BuildKitNames.storybook_nursery, BuildKitNames.cozy_kitsch}
+                  BuildKitNames.artist_studio, BuildKitNames.storybook_nursery, BuildKitNames.cozy_kitsch,
+                  BuildKitNames.comfy_gamer,}
 
 @dataclass
 class Sims4Options(PerGameCommonOptions):
