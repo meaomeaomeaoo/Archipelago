@@ -1,27 +1,24 @@
-from dataclasses import dataclass, fields
-from datetime import datetime
-from typing import Any, ClassVar, cast, Dict, Iterator, List, Tuple, Protocol
+import typing
 
-from Options import AssembleOptions, Choice, DeathLink, DefaultOnToggle, Option, PerGameCommonOptions, \
-    ProgressionBalancing, Range, Toggle
+from Options import Range, Choice, Toggle, DefaultOnToggle, AssembleOptions, DeathLink, ProgressionBalancing
 
 
 # typing boilerplate
-class FlagsProtocol(Protocol):
+class FlagsProtocol(typing.Protocol):
     value: int
-    default: ClassVar[int]
-    flags: List[str]
+    default: int
+    flags: typing.List[str]
 
 
-class FlagProtocol(Protocol):
+class FlagProtocol(typing.Protocol):
     value: int
-    default: ClassVar[int]
+    default: int
     flag: str
 
 
 # meta options
 class EvermizerFlags:
-    flags: List[str]
+    flags: typing.List[str]
 
     def to_flag(self: FlagsProtocol) -> str:
         return self.flags[self.value]
@@ -39,12 +36,6 @@ class OffOnFullChoice(Choice):
     option_on = 1
     option_full = 2
     alias_chaos = 2
-
-
-class OffOnLogicChoice(Choice):
-    option_off = 0
-    option_on = 1
-    option_logic = 2
 
 
 # actual options
@@ -102,18 +93,10 @@ class ExpModifier(Range):
     default = 200
 
 
-class SequenceBreaks(EvermizerFlags, OffOnLogicChoice):
-    """Disable, enable some sequence breaks or put them in logic"""
-    display_name = "Sequence Breaks"
-    default = 0
-    flags = ['', 'j', 'J']
-
-
-class OutOfBounds(EvermizerFlags, OffOnLogicChoice):
-    """Disable, enable the out-of-bounds glitch or put it in logic"""
-    display_name = "Out Of Bounds"
-    default = 0
-    flags = ['', 'u', 'U']
+class FixSequence(EvermizerFlag, DefaultOnToggle):
+    """Fix some sequence breaks"""
+    display_name = "Fix Sequence"
+    flag = '1'
 
 
 class FixCheats(EvermizerFlag, DefaultOnToggle):
@@ -159,28 +142,11 @@ class Ingredienizer(EvermizerFlags, OffOnFullChoice):
     flags = ['i', '', 'I']
 
 
-class Sniffamizer(EvermizerFlags, Choice):
-    """
-    Off: all vanilla items in sniff spots
-    Shuffle: sniff items shuffled into random sniff spots
-    """
+class Sniffamizer(EvermizerFlags, OffOnFullChoice):
+    """On Shuffles, Full randomizes drops in sniff locations"""
     display_name = "Sniffamizer"
-    option_off = 0
-    option_shuffle = 1
-    if datetime.today().year > 2024 or datetime.today().month > 3:
-        option_everywhere = 2
-        __doc__ = __doc__ + "    Everywhere: add sniff spots to multiworld pool"
-    alias_true = 1
     default = 1
     flags = ['s', '', 'S']
-
-
-class SniffIngredients(EvermizerFlag, Choice):
-    """Select which items should be used as sniff items"""
-    display_name = "Sniff Ingredients"
-    option_vanilla_ingredients = 0
-    option_random_ingredients = 1
-    flag = 'v'
 
 
 class Callbeadamizer(EvermizerFlags, OffOnFullChoice):
@@ -220,13 +186,13 @@ class TrapCount(Range):
 
 # more meta options
 class ItemChanceMeta(AssembleOptions):
-    def __new__(mcs, name: str, bases: Tuple[type], attrs: Dict[Any, Any]) -> "ItemChanceMeta":
+    def __new__(mcs, name, bases, attrs):
         if 'item_name' in attrs:
             attrs["display_name"] = f"{attrs['item_name']} Chance"
         attrs["range_start"] = 0
         attrs["range_end"] = 100
-        cls = super(ItemChanceMeta, mcs).__new__(mcs, name, bases, attrs)   # type: ignore[no-untyped-call]
-        return cast(ItemChanceMeta, cls)
+
+        return super(ItemChanceMeta, mcs).__new__(mcs, name, bases, attrs)
 
 
 class TrapChance(Range, metaclass=ItemChanceMeta):
@@ -267,53 +233,32 @@ class SoEProgressionBalancing(ProgressionBalancing):
     special_range_names = {**ProgressionBalancing.special_range_names, "normal": default}
 
 
-# noinspection SpellCheckingInspection
-@dataclass
-class SoEOptions(PerGameCommonOptions):
-    difficulty:            Difficulty
-    energy_core:           EnergyCore
-    required_fragments:    RequiredFragments
-    available_fragments:   AvailableFragments
-    money_modifier:        MoneyModifier
-    exp_modifier:          ExpModifier
-    sequence_breaks:       SequenceBreaks
-    out_of_bounds:         OutOfBounds
-    fix_cheats:            FixCheats
-    fix_infinite_ammo:     FixInfiniteAmmo
-    fix_atlas_glitch:      FixAtlasGlitch
-    fix_wings_glitch:      FixWingsGlitch
-    shorter_dialogs:       ShorterDialogs
-    short_boss_rush:       ShortBossRush
-    ingredienizer:         Ingredienizer
-    sniffamizer:           Sniffamizer
-    sniff_ingredients:     SniffIngredients
-    callbeadamizer:        Callbeadamizer
-    musicmizer:            Musicmizer
-    doggomizer:            Doggomizer
-    turdo_mode:            TurdoMode
-    death_link:            DeathLink
-    trap_count:            TrapCount
-    trap_chance_quake:     TrapChanceQuake
-    trap_chance_poison:    TrapChancePoison
-    trap_chance_confound:  TrapChanceConfound
-    trap_chance_hud:       TrapChanceHUD
-    trap_chance_ohko:      TrapChanceOHKO
-    progression_balancing: SoEProgressionBalancing
-
-    @property
-    def trap_chances(self) -> Iterator[TrapChance]:
-        for field in fields(self):
-            option = getattr(self, field.name)
-            if isinstance(option, TrapChance):
-                yield option
-
-    @property
-    def flags(self) -> str:
-        flags = 'AGBo'  # configures auto-tracker to AP's fill
-        for field in fields(self):
-            option = getattr(self, field.name)
-            if isinstance(option, (EvermizerFlag, EvermizerFlags)):
-                assert isinstance(option, Option)
-                # noinspection PyUnresolvedReferences
-                flags += option.to_flag()
-        return flags
+soe_options: typing.Dict[str, AssembleOptions] = {
+    "difficulty":            Difficulty,
+    "energy_core":           EnergyCore,
+    "required_fragments":    RequiredFragments,
+    "available_fragments":   AvailableFragments,
+    "money_modifier":        MoneyModifier,
+    "exp_modifier":          ExpModifier,
+    "fix_sequence":          FixSequence,
+    "fix_cheats":            FixCheats,
+    "fix_infinite_ammo":     FixInfiniteAmmo,
+    "fix_atlas_glitch":      FixAtlasGlitch,
+    "fix_wings_glitch":      FixWingsGlitch,
+    "shorter_dialogs":       ShorterDialogs,
+    "short_boss_rush":       ShortBossRush,
+    "ingredienizer":         Ingredienizer,
+    "sniffamizer":           Sniffamizer,
+    "callbeadamizer":        Callbeadamizer,
+    "musicmizer":            Musicmizer,
+    "doggomizer":            Doggomizer,
+    "turdo_mode":            TurdoMode,
+    "death_link":            DeathLink,
+    "trap_count":            TrapCount,
+    "trap_chance_quake":     TrapChanceQuake,
+    "trap_chance_poison":    TrapChancePoison,
+    "trap_chance_confound":  TrapChanceConfound,
+    "trap_chance_hud":       TrapChanceHUD,
+    "trap_chance_ohko":      TrapChanceOHKO,
+    "progression_balancing": SoEProgressionBalancing,
+}
