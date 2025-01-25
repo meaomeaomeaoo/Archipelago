@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from Options import Choice, PerGameCommonOptions, OptionSet
-from .Names.DLC import ExpansionNames, GamePackNames, StuffNames, CASKitNames, BuildKitNames
+from .Names.DLC import ExpansionNames, GamePackNames, StuffNames, CASKitNames, BuildKitNames, BuildCASKitNames, GameplayKitNames
 
 class AspirationGoal(Choice):
     """The Aspiration Needed to win the game and the only one that will be included in the locations"""
@@ -89,7 +89,18 @@ class BuildKits(OptionSet):
                   BuildKitNames.bathroom_clutter, BuildKitNames.basement_treasures, BuildKitNames.greenhouse_haven,
                   BuildKitNames.book_nook, BuildKitNames.modern_luxe, BuildKitNames.castle_estate,
                   BuildKitNames.party_essentials, BuildKitNames.cozy_bistro, BuildKitNames.riviera_retreat,
-                  BuildKitNames.artist_studio, BuildKitNames.storybook_nursery, BuildKitNames.cozy_kitsch}
+                  BuildKitNames.artist_studio, BuildKitNames.storybook_nursery, BuildKitNames.cozy_kitsch,
+                  BuildKitNames.comfy_gamer}
+
+class BuildCASKits(OptionSet):
+    """List of Build + CAS Kits that will be included in the shuffling. (Not Yet Implemented)"""
+    display_name = "build_cas_kits"
+    valid_keys = {BuildCASKitNames.secret_sanctuary, BuildCASKitNames.cassanova_cave}
+
+class GameplayKits(OptionSet):
+    """List of Gameplay Kits that will be included in the shuffling. (Not Yet Implemented)"""
+    display_name = "gameplay_kits"
+    valid_keys = {GameplayKitNames.bust_the_dust}
 
 @dataclass
 class Sims4Options(PerGameCommonOptions):
@@ -100,3 +111,5 @@ class Sims4Options(PerGameCommonOptions):
     stuff_packs: StuffPacks
     cas_kits: CASKits
     build_kits: BuildKits
+    build_cas_kits: BuildCASKits
+    gameplay_kits: GameplayKits
